@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup SourcePawn Compiler
-        uses: rumblefrog/setup-sp@v1.2.4
+        uses: rumblefrog/setup-sp@v1.3.1
         with:
           version: "1.12.x"
 
@@ -47,13 +47,11 @@ jobs:
           # Destination path
           path: ftp/
       - name: Set up node
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
-      - name: Install npm packages
-        run: npm install fs path
+          node-version: 20
       - name: Create release
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
