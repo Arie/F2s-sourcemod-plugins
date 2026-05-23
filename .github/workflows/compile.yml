@@ -35,7 +35,7 @@ jobs:
           path: dist/ftp/
 
   publish:
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request' && github.repository == 'F2/F2s-sourcemod-plugins'
+    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -82,20 +82,16 @@ jobs:
             }
               
             const release = await github.rest.repos.createRelease({
-              owner: "F2",
-              repo: "F2s-sourcemod-plugins",
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               tag_name: dateString + "-" + d.getTime(),
               body: body,
             });
 
             github.rest.repos.uploadReleaseAsset({
-              owner: "F2",
-              repo: "F2s-sourcemod-plugins",
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               release_id: release.data.id,
               name: "f2-sourcemod-plugins.zip",
               data: data,
             });
-      - name: Upload to FTP
-        working-directory: ftp
-        run: |
-          find . -type f -exec curl -u krus.dk:${{ secrets.FTP_KRUSDK_PASSWORD }} --ftp-create-dirs -T {} ftp://krus.dk/sourcemod/{} \;
