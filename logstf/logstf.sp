@@ -158,7 +158,6 @@ TODO:
 #define UPDATE_URL		"https://sourcemod.krus.dk/logstf/update.txt"
 
 #define LOG_PATH  "logstf.log"
-#define PLOG_PATH "logstf-partial.log"
 #define LOG_BUFFERSIZE 768 // I have seen log lines longer than 512
 #define LOG_FLUSHCNT 100
 #define LOG_BUFFERCNT 150
@@ -709,39 +708,15 @@ void UploadLog(bool partial) {
 	ReplaceString(title, sizeof(title), "{blue}", g_sCachedBluTeamName, false);
 	ReplaceString(title, sizeof(title), "{red}", g_sCachedRedTeamName, false);
 
-	char path[64], partialpath[64];
+	char path[64];
 	GetLogPath(LOG_PATH, path, sizeof(path));
-	GetLogPath(PLOG_PATH, partialpath, sizeof(partialpath));
-
-	if (partial) {
-		DeleteFile(partialpath);
-		if (!CopyFile(path, partialpath)) {
-			LogError("Failed to create partial log file");
-			g_bIsUploading = false;
-			if (g_bReuploadASAP) {
-				g_bReuploadASAP = false;
-				UploadLog(false);
-			}
-			return;
-		}
-
-		// We should NOT add a Round_Stalemate just after a round has ended (logs.tf will not understand it)
-		//char buffer[128];
-		//char time[32];
-		//FormatTime(time, sizeof(time), "%m/%d/%Y - %H:%M:%S");
-		//FormatEx(buffer, sizeof(buffer), "\nL %s: %s\n", time, "World triggered \"Round_Stalemate\"");
-
-		//Handle file = OpenFile(partialpath, "a");
-		//WriteFileString(file, buffer, false);
-		//delete file;
-	}
 
 	if (!partial)
 		MC_PrintToChatAll("%s", "{lightgreen}[LogsTF] {blue}Uploading logs...");
 
 	AnyHttpRequest req = AnyHttp.CreatePost("http://logs.tf/upload");
 
-	req.PutFile("logfile", partial ? partialpath : path);
+	req.PutFile("logfile", path);
 	req.PutString("title", title);
 	req.PutString("map", g_sCachedMap);
 	req.PutString("key", apiKey);
